@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超高校级的翻唱</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+    <script src="/static/jquery-3.6.1.js"></script>
+</head>
+
+<body>
+    <h1>超高校级的翻唱</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" id="audio-file" accept="audio/*">
+        <button type="button" id="send-wav">Start</button>
+    </form>
+    <audio controls autoplay id="audio-player">
+        <source id="audio-source" type="audio/wav" src>
+        Your browser does not support the audio element.
+    </audio>
+			<audio controls autoplay id="audio">
+				<source type='audio/wav' src="" />
+			</audio>
+
+    <script>const audioFileInput = document.getElementById("audio-file");
+        const audioPlayer = document.getElementById("audio-player");
+        const sendButton = document.getElementById("send-wav");
+
+
+        audioFileInput.addEventListener("change", function () {
+            const file = this.files[0];
+            const fileURL = URL.createObjectURL(file);
+            audioPlayer.src = fileURL;
+            audioPlayer.load();
+        });
+
+        sendButton.addEventListener("click", function () {
+            // var file = this.files[0];
+            // var fileURL = URL.createObjectURL(file);
+            var fileInput = document.querySelector('input[type="file"]');
+            var file = fileInput.files[0];
+            var formData = new FormData();
+
+            formData.append('file', file);
+
+            const Http = new XMLHttpRequest();
+			const url = '/send';
+            Http.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    //正常响应
+                    if (this.status == 200) {
+                        data = JSON.parse(this.response);
+                        //生成url
+                        audio_url = "/get/" + data.id + ".wav";
+						$("#audio").html(
+							"<source type='audio/wav' src='" + audio_url + "' />"
+						);
+						//重新加载标签
+						document.getElementById("audio").load();
+                    }
+                    //请求过多
+                    else if (this.status == 429) {
+                        window.alert("请求过多！");
+                    }
+                    //其他错误
+                    else {
+                        window.alert('JSON.parse(this.response).message');
+                    }
+                }
+            };
+            Http.open("POST", url, false);
+<!--			Http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")-->
+			Http.send(formData);
+        });
+    </script>
+</body>
+
+</html>
