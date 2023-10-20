@@ -1,2 +1,2 @@
 # website
-deploy website using nginx, uwsgi, flask
+This repository contains code and resources for deploying dynamic websites using Nginx, uWSGI, and Flask.
